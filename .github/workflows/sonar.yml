@@ -11,25 +11,27 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 1. Build Wrapperを準備（パスを通す正攻法）
       - name: Install Build Wrapper
         run: |
           curl -sSLo build-wrapper.zip https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
           unzip -o build-wrapper.zip
           echo "$(pwd)/build-wrapper-linux-x86" >> $GITHUB_PATH
 
-      # 2. ビルド実行（-c を使わず、プロジェクト全体をビルドする形）
       - name: Run Build Wrapper
         run: |
+          # 以前失敗した可能性のあるキャッシュをクリアするため、明示的に clean な状態でビルド
           build-wrapper-linux-x86-64 --out-dir bw-output g++ main.cpp -o my_app
 
-      # 3. 解析実行（設定は properties ファイルに任せる綺麗な形）
       - name: Run SonarScanner
         uses: SonarSource/sonarcloud-github-action@v3.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          # args は最小限に。詳細は properties ファイルに集約。
           args: >
-            --define sonar.cfamily.build-wrapper-output=bw-output
+            -Dsonar.projectKey=kunisan222_sandbox-sonarcloud
+            -Dsonar.organization=kunisan222
+            -Dsonar.sources=.
+            -Dsonar.cfamily.build-wrapper-output=bw-output
+            -Dsonar.python.version=3
+            -Dsonar.lang.optimisticAnalysis=true
