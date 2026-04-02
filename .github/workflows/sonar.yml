@@ -11,24 +11,25 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 1. 道具のダウンロードと権限付与
+      # 1. Build Wrapperを準備（パスを通す正攻法）
       - name: Install Build Wrapper
         run: |
           curl -sSLo build-wrapper.zip https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
           unzip -o build-wrapper.zip
-          chmod +x ./build-wrapper-linux-x86/build-wrapper-linux-x86-64
+          echo "$(pwd)/build-wrapper-linux-x86" >> $GITHUB_PATH
 
-      # 2. ビルド実行（ここが重要：出力先を固定）
+      # 2. ビルド実行（-c を使わず、プロジェクト全体をビルドする形）
       - name: Run Build Wrapper
         run: |
-          ./build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output g++ -c main.cpp
+          build-wrapper-linux-x86-64 --out-dir bw-output g++ main.cpp -o my_app
 
-      # 3. 解析実行
+      # 3. 解析実行（設定は properties ファイルに任せる綺麗な形）
       - name: Run SonarScanner
         uses: SonarSource/sonarcloud-github-action@v3.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
+          # args は最小限に。詳細は properties ファイルに集約。
           args: >
-            -Dsonar.cfamily.build-wrapper-output=bw-output
+            --define sonar.cfamily.build-wrapper-output=bw-output
