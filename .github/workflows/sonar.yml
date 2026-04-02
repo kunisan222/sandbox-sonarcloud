@@ -6,33 +6,24 @@ jobs:
   build:
     name: Build and analyze
     runs-on: ubuntu-latest
-    env:
-      BUILD_WRAPPER_OUT_DIR: bw-output
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Install SonarCloud Scanner
-        uses: SonarSource/sonarcloud-github-action@v3.1.0
-        with:
-          args: >
-            -Dsonar.scanner.skip=true
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      # Build Wrapperをダウンロードしてパスを通す（これが重要！）
-      - name: Download and set up Build Wrapper
+      # 1. 道具のダウンロードと権限付与
+      - name: Install Build Wrapper
         run: |
-          curl -sSLo build-wrapper-linux-x86.zip https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
-          unzip -o build-wrapper-linux-x86.zip
-          echo "$(pwd)/build-wrapper-linux-x86" >> $GITHUB_PATH
+          curl -sSLo build-wrapper.zip https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
+          unzip -o build-wrapper.zip
+          chmod +x ./build-wrapper-linux-x86/build-wrapper-linux-x86-64
 
+      # 2. ビルド実行（ここが重要：出力先を固定）
       - name: Run Build Wrapper
         run: |
-          # パスが通ったのでそのまま実行できるようになります
-          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} g++ main.cpp -o my_app
+          ./build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output g++ -c main.cpp
 
+      # 3. 解析実行
       - name: Run SonarScanner
         uses: SonarSource/sonarcloud-github-action@v3.1.0
         env:
@@ -40,4 +31,4 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            --define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}"
+            -Dsonar.cfamily.build-wrapper-output=bw-output
