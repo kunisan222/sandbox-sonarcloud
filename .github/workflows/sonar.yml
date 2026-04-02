@@ -20,7 +20,7 @@ jobs:
       - name: Run Build Wrapper
         run: |
           # 以前失敗した可能性のあるキャッシュをクリアするため、明示的に clean な状態でビルド
-          build-wrapper-linux-x86-64 --out-dir bw-output g++ main.cpp -o my_app
+          build-wrapper-linux-x86-64 --out-dir bw-output g++ "$GITHUB_WORKSPACE/main.cpp" -o my_app
 
       - name: Run SonarScanner
         uses: SonarSource/sonarcloud-github-action@v3.1.0
