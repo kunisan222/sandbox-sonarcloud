@@ -38,4 +38,4 @@ jobs:
             -Dsonar.cfamily.build-wrapper-output=bw-output
             -Dsonar.sourceEncoding=UTF-8
             -Dsonar.scm.exclusions.disabled=true
-#            -Dsonar.working.directory=/tmp/sonar
+            -Dsonar.working.directory=/tmp/sonar
