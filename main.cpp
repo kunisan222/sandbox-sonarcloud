@@ -2,26 +2,34 @@
 #include <string>
 #include <vector>
 
-// 構造を大きく変えるために新しい関数を追加
-void leaky_function() {
-    int* leak = new int[100]; // わざとらしいメモリリークその1
-    leak[0] = 10;
-    // delete[] leak; // あえてコメントアウト
+// 1. メモリリーク: new したのに delete していない
+void trigger_memory_leak() {
+    int* data = new int[100];
+    data[0] = 42;
+    // delete[] data; // ここをコメントアウトしてリークさせる
+}
+
+// 2. 未定義の動作: 範囲外アクセス
+void trigger_out_of_bounds() {
+    std::vector<int> vec = {1, 2, 3};
+    int val = vec[10]; // 範囲外アクセス
+    std::cout << val << std::endl;
 }
 
 int main() {
-    std::cout << "Starting new analysis test..." << std::endl;
+    std::cout << "Starting full analysis test..." << std::endl;
 
-    // 前回のバグも残しつつ、少し形を変える
-    std::string s1 = "Sonar";
-    std::string s2 = "Cloud";
-    const char* p = (s1 + s2).c_str(); // ダングリングポインタ（危険！）
+    // 3. ダングリングポインタ: 寿命が切れた文字列のポインタを参照
+    const char* p;
+    {
+        std::string s = "Dangling Pointer Test";
+        p = s.c_str();
+    }
+    // ここで p を使うのは危険！
+    std::cout << "Dangerous pointer access: " << *p << std::endl;
 
-    leaky_function();
+    trigger_memory_leak();
+    trigger_out_of_bounds();
 
-    // 未使用の変数（これも指摘対象になるはず）
-    int unused_variable = 42;
-
-    std::cout << "Result: " << p << std::endl; 
     return 0;
 }
