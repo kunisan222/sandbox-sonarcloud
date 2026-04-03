@@ -22,7 +22,7 @@ jobs:
       - name: Run Build Wrapper
         run: |
           # 前回の残骸を消し、コンパイラに「ここが作業場所だ」と絶対パスで教え込みます
-          build-wrapper-linux-x86-64 --out-dir bw-output g++ -DSONAR $GITHUB_WORKSPACE/main.cpp -o my_app
+          build-wrapper-linux-x86-64 --out-dir bw-output g++ /home/runner/work/sandbox-sonarcloud/sandbox-sonarcloud/main.cpp -o my_app
 
       # 3. 解析実行（設定をすべてここに詰め込む）
       - name: Run SonarScanner
