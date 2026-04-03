@@ -38,5 +38,5 @@ jobs:
             -Dsonar.cfamily.build-wrapper-output=bw-output
             -Dsonar.sourceEncoding=UTF-8
             -Dsonar.scm.exclusions.disabled=true
-            -Dsonar.working.directory=/tmp/sonar
-            -Dsonar.cfamily.cache.enabled=false
+            -Dsonar.legacy.scm.stats.disable=true
+            -Dsonar.qualitygate.wait=true
